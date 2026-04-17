@@ -1,4 +1,3 @@
-
 #include "person.h"
 
 Person::Person(){
@@ -10,12 +9,30 @@ Person::Person(){
 Person::~Person(){
     delete birthdate;
     // TODO: complete the method!
+    delete email;
+    delete phone;
 }
 
 
 Person::Person(string f_name, string l_name, string b_date, string email, string phone){
     // TODO: Complete this method!
     // phone and email strings are in full version
+    this -> f_name = f_name;
+    this -> l_name = l_name;
+    
+    birthdate = new Date(b_date);
+    
+    //parse email string
+    string email_type = email.substr(1, email.find(')')- 1);
+    string email_addr = email.substr(email.find(')') + 2);
+    this -> email = new Email(email_type, email_addr);
+    
+    string phone_type = phone.substr(1, phone.find(')') - 1);
+    string phone_num = phone.substr(phone.find(')')+2);
+    this->phone = new Phone(phone_type, phone_num);
+    
+    next = NULL;
+    prev = NULL;
 }
 
 
@@ -48,14 +65,22 @@ void Person::set_person(){
 
     cout << "Type of email address: ";
     // code here
+    std::getline(std::cin, type);
     cout << "Email address: ";
     // code here
+    std::getline(std::cin, temp);
+    email = new Email(type, temp);
 
     cout << "Type of phone number: ";
     // code here
+    std::getline(std::cin, type);
     cout << "Phone number: ";
     // code here
+    std::getline(std::cin, temp);
+    phone = new Phone(type, temp);
     // code here
+    next = NULL;
+    prev = NULL;
 }
 
 
@@ -64,6 +89,27 @@ void Person::set_person(string filename){
     // Look at person_template files as examples.     
     // Phone number in files can have '-' or not.
     // TODO: Complete this method!
+    ifstream infile(filename.c_str());
+    
+    string temp, type;
+    
+    getline(infile, f_name);
+    getline(infile, l_name);
+    getline(infile, temp);
+    birthdate = new Date(temp);
+    
+    getline(infile, temp);
+    type = temp.substr(1, temp.find(')')-1);
+    string num = temp.substr(temp.find(')')+2);
+    phone = new Phone(type,num);
+    
+    getline(infile, temp);
+    type = temp.substr(1, temp.find(')')-1);
+    string addr = temp.substr(temp.find(')')+2);
+    email = new Email(type, addr);
+    
+    next = NULL;
+    prev = NULL;
 }
 
 
@@ -71,10 +117,12 @@ bool Person::operator==(const Person& rhs){
     // TODO: Complete this method!
     // Note: you should check first name, last name and birthday between two persons
     // refer to bool Date::operator==(const Date& rhs)
+    return (f_name == rhs.f_name && l_name == rhs.l_name && *birthdate == *rhs.birthdate);
 }
 
 bool Person::operator!=(const Person& rhs){ 
     // TODO: Complete this method!
+    return !(*this == rhs);
 }
 
 
