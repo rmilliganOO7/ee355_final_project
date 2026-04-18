@@ -12,9 +12,10 @@ Network::Network(){
 
 
 Network::Network(string fileName){
-    // TODO: complete this method!
+    // TODO: complete this method! - finished(riley)
     // Implement it in one single line!
     // You may need to implement the load method before this!
+    loadDB(fileName); 
 }
 
 Network::~Network(){ 
@@ -23,26 +24,100 @@ Network::~Network(){
 Person* Network::search(Person* searchEntry){
     // Searches the Network for searchEntry
     // if found, returns a pointer to it, else returns NULL
-    // TODO: Complete this method
+    // TODO: Complete this method - finished(riley)
+    if (searchEntry == NULL)
+        return NULL;
+    Person* cur = head;
+    while (cur != NULL){
+        if (*cur == *searchEntry)
+            return cur;
+        cur = cur->next;
+    }
+    return NULL;
 }
 
 
 Person* Network::search(string fname, string lname){
     // New == for Person, only based on fname and lname
     // if found, returns a pointer to it, else returns NULL
-    // TODO: Complete this method
+    // TODO: Complete this method - finished(riley)
     // Note: two ways to implement this, 1st making a new Person with fname and lname and and using search(Person*), 2nd using fname and lname directly. 
+    Person* cur = head;
+	while (cur != NULL){
+		if (cur->f_name == fname && cur->l_name == lname)
+			return cur;
+		cur = cur->next;
+	}
+	return NULL;
 }
 
 
-
+static bool is_separator_line(const string& s){
+	if (s.size() < 4)
+		return false;
+	for (int i = 0; i < (int)s.size(); i++){
+		if (s[i] != '-')
+			return false;
+	}
+	return true;
+}
 
 void Network::loadDB(string filename){
-    // TODO: Complete this method
+    // TODO: Complete this method - finished(riley)
+    ifstream in(filename.c_str());
+    if (!in)
+        return;
+
+    Person* cur = head;
+    while (cur != NULL){
+        Person* nxt = cur->next;
+        delete cur;
+        cur = nxt;
+    }
+    head = NULL;
+    tail = NULL;
+    count = 0;
+
+    string fn, ln, bd, el, pl, sep;
+    while (getline(in, fn)){
+        if (fn.size() == 0)
+            continue;
+        if (is_separator_line(fn))
+            continue;
+        if (!getline(in, ln))
+            break;
+        if (!getline(in, bd))
+            break;
+        if (!getline(in, el))
+            break;
+        if (!getline(in, pl))
+            break;
+        Person* p = new Person(fn, ln, bd, el, pl);
+        push_back(p);
+        if (getline(in, sep)){
+            if (!is_separator_line(sep)){
+                // malformed vs. strict template; keep going without losing a line
+            }
+        }
+    }
+    
 }
 
 void Network::saveDB(string filename){
-    // TODO: Complete this method
+    // TODO: Complete this method - finished(riley)
+    ofstream out(filename.c_str());
+	if (!out)
+		return;
+	Person* ptr = head;
+	streambuf* oldbuf = cout.rdbuf();
+	while (ptr != NULL){
+		cout.rdbuf(out.rdbuf());
+		ptr->print_person();
+		cout.rdbuf(oldbuf);
+		out << "--------------------" << endl;
+		ptr = ptr->next;
+	}
+	cout.rdbuf(oldbuf);
 }
 
 
@@ -77,13 +152,35 @@ void Network::push_front(Person* newEntry){
 
 
 void Network::push_back(Person* newEntry){
-    // Adds a new Person (newEntry) to the back of LL
+    // Adds a new Person (newEntry) to the back of LL - finished(riley)
     // TODO: Complete this method
+    newEntry->next = NULL; //same as push_front
+	newEntry->prev = tail; //same
+	if (tail != NULL)
+		tail->next = newEntry;
+	else
+		head = newEntry;
+	tail = newEntry;
+	count++;
 }
 
 
 bool Network::remove(string fname, string lname){
-    // TODO: Complete this method
+    // TODO: Complete method - finished(riley)
+    Person* p = search(fname, lname);
+	if (p == NULL)
+		return false;
+	if (p->prev != NULL)
+		p->prev->next = p->next;
+	else
+		head = p->next;
+	if (p->next != NULL)
+		p->next->prev = p->prev;
+	else
+		tail = p->prev;
+	delete p;
+	count--;
+	return true;
  
 }
 
