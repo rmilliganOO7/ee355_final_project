@@ -3,6 +3,7 @@
 #include <limits>
 #include "misc.h"
 #include <fstream>
+#include <dirent.h>
 
 Network::Network(){
     head = NULL;
@@ -13,6 +14,9 @@ Network::Network(){
 
 Network::Network(string fileName){
     // TODO: complete this method! - finished(riley)
+    head = NULL;
+	tail = NULL;
+	count = 0;
     // Implement it in one single line!
     // You may need to implement the load method before this!
     loadDB(fileName); 
@@ -218,46 +222,92 @@ void Network::showMenu(){
         cout << "\033[2J\033[1;1H";
 
         if (opt==1){
-            // TODO: Complete me!
+            // TODO: Complete me! - completed(riley)
             cout << "Saving network database \n";
             cout << "Enter the name of the save file: ";
-            // Save the network database into the file with the given name,
-            // with each person saved in the format the save as printing out the person info,
-            // and people are delimited similar to "networkDB.txt" format
+            getline(cin, fileName);
+            saveDB(fileName);
             cout << "Network saved in " << fileName << endl;
+            
         }
         else if (opt==2){
             // TODO: Complete me!
             cout << "Loading network database \n";
-            // TODO: print all the files in this same directory that have "networkDB.txt" format
+            // TODO: print all the files in this same directory that have "networkDB.txt" format - completed(riley)
+            DIR* dir = opendir(".");
+            if (dir != NULL){
+                struct dirent* ent;
+                while ((ent = readdir(dir)) != NULL){
+                    string n = ent->d_name;
+                    if (n.size() >= 4 && n.substr(n.size() - 4) == ".txt")
+                        cout << n << endl;
+                }
+                closedir(dir);
+            }
             // print format: one filename one line.
             // This step just shows all the available .txt file to load.
             cout << "Enter the name of the load file: "; 
             // If file with name FILENAME does not exist: 
-            cout << "File FILENAME does not exist!" << endl;
+            //cout << "File FILENAME does not exist!" << endl;
             // If file is loaded successfully, also print the count of people in it: 
-            cout << "Network loaded from " << fileName << " with " << count << " people \n";
+            getline(cin, fileName);
+            ifstream fin(fileName.c_str());
+            if (!fin){
+                cout << "File " << fileName << " does not exist!" << endl;
+            }
+            else{
+                fin.close();
+                loadDB(fileName);
+                cout << "Network loaded from " << fileName << " with " << count << " people \n";
+            }
         }
         else if (opt == 3){
-            // TODO: Complete me!
+            // TODO: Complete me! - completed(riley)
             // TODO: use push_front, and not push_back 
             // Add a new Person ONLY if it does not exists!
             cout << "Adding a new person \n";
+            Person* p = new Person();
+            if (search(p->f_name, p->l_name) != NULL){
+                delete p;
+                cout << "Person already exists! \n";
+            }
+            else{
+                push_front(p);
+            }
         }
         else if (opt == 4){
-            // TODO: Complete me!
+            // TODO: Complete me! - completed(riley)
             // if found, cout << "Remove Successful! \n";
             // if not found: cout << "Person not found! \n";
             cout << "Removing a person \n";
             cout << "First name: ";
+            getline(cin, fname);
             cout << "Last name: ";
+            getline(cin, lname);
+            if (remove(fname, lname))
+                cout << "Remove Successful! \n";
+            else
+                cout << "Person not found! \n";
         }
         else if (opt==5){
-            // TODO: Complete me!
+            // TODO: Complete me! - completed(riley)
             // print the people with the given last name
             // if not found: cout << "Person not found! \n";
+            bool found = false;
             cout << "Print people with last name \n";
             cout << "Last name: ";
+            getline(cin, lname);
+            
+            Person* cur = head;
+            while (cur != NULL){
+                if (cur->l_name == lname){
+                    cur->print_person();
+                    found = true;
+                }
+                cur = cur->next;
+            }
+            if (!found)
+                cout << "Person not found! \n";
         }
         
         else
