@@ -23,6 +23,15 @@ Network::Network(string fileName){
 }
 
 Network::~Network(){ 
+    Person* cur = head;
+	while (cur != NULL){
+		Person* nxt = cur->next;
+		delete cur;
+		cur = nxt;
+	}
+	head = NULL;
+	tail = NULL;
+	count = 0;
 }
 
 Person* Network::search(Person* searchEntry){
