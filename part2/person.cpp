@@ -175,7 +175,7 @@ void Person::print_friends(){
 	cout << f_name << ", " << l_name << endl;
 	cout << "------------------------------" << endl;
 
-	for (int i = 0; i < (nt)sortedFriends.size(); i++){
+	for (int i = 0; i < (int)sortedFriends.size(); i++){
 		cout << sortedFriends[i] -> f_name << ", "
 			<< sortedFriends[i] -> l_name << endl;
 	}
