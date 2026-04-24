@@ -43,3 +43,56 @@ Files Included
 5. misc.h / misc.cpp
 - COntains the printMe() helper function used to print the Trojan-Book banner.
 
+Design Summary
+- Inheritance:
+  contact is an abstract parent class. Email adn Phone inherit from contact and implement print(), get_contact(), and set_contact().
+
+- Dynamic Memory:
+  Person dynamically allocates Date, Email, and Phone objects. The Person destructor deletes these objects.
+  Network dynamically manages Person nodes in the linked list and deletes all nodes in its destructor.
+
+- Linked List Structure
+  Network stores Person objects in a doubly linked list using next and prev pointers. This allows insertion at the fornt or back and safe removal of matching entries.
+
+How Input/Output Works
+- A Person can be created interactively from user input.
+- A Person can also be created from a file
+- Network databases can be loaded from .txt files
+- The database can be saved back into a text file in the same printed format used by print_person()
+
+Main Features Implemented
+- Contact hierarchy with Phone and Email subclasses
+- Date parsing and comparison
+- Person construction from terminal input and file input
+- Person equality and inequality operators
+- Doubly linked list database
+- Add a person to the front of the network
+- Add a person to the back of the network
+- Remove a person by first and last name
+- Search for a person by object or by first/last name
+- Save and load the full network database
+- Print people with a requested last name
+- Interactive text menu
+Compilation
+Compile command is:
+g++ -std=c++11 contact.cpp date.cpp person.cpp network.cpp misc.cpp
+test_network.cpp -o test_network
+Assumptions
+- Input files follow the expected course format.
+- Each Person has exactly one birth date, one phone number, and one
+email address
+- Phone numbers may be entered with or without dashes.
+- Duplicate checking in the menu uses first name and last name before
+insertion.
+- Person equality uses first name, last name, and birth date.
+Testing Suggestions
+We tested the code using the following kinds of cases:
+- Creating a person manually from keyboard input
+- Loading a database from a .txt file
+- Saving the current network to a new file
+- Adding a person who does not already exist
+- Attempting to add a duplicate person
+- Removing an existing person
+- Attempting to remove a missing person
+- Printing all people with the same last name
+- Verifying that phone numbers print in XXX-XXX-XXXX format
