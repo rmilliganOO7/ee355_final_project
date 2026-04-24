@@ -132,6 +132,12 @@ void Person::print_person(){
 	birthdate->print_date("Month D, YYYY");
     phone->print();
     email->print();
+
+	for(int i = 0; i < (int)myfriends.size(); i++){
+		cout << myfriends[i] -> email -> get_contact("short") 
+			<< " (" << myfriends[i] -> f_name << " " 
+			<< myfriends[i] -> l_name << ")" << endl;
+	}
 }
 
 // part 2 (bryson)
