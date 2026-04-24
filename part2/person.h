@@ -31,6 +31,7 @@ public:
 	void set_person(string filename);
 
     void makeFriend(Person* newFriend); // part2 add makeFriend function (bryson)
+	void print_friends(); // part 4 function (cesar)
 
     bool operator==(const Person& rhs);
     bool operator!=(const Person& rhs);
