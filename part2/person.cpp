@@ -153,3 +153,30 @@ void Person::makeFriend(Person* newFriend){
 
     myfriends.push_back(newFriend);
 }
+// make pretty list part 4 (cesar)
+void Person::print_friends(){
+	vector<Person*> sortedFriends = myfriends;
+
+	for (int i = 0; i < (int)sortedFriends.size() - 1; i++){
+		for (int j = 0; j < (int)sortedFriends.size() - i - 1; j++){
+			string code1 = sortedFriends[j] -> f_name + sortedFriends[j] -> l_name;
+			string code2 = sortedFriends[j + 1] -> f_name + sortedFriends[j + 1] -> l_name;
+
+			if (code1[0] > code2[0] ||
+				(code1[0] == code2[0] && code1[1] > code2[1])){
+				
+				Person* temp = sortedFriends[j];
+				sortedFriends[j] = sortedFriends[j +1];
+				sortedFriends[j + 1] = temp;
+				
+			}
+		}
+	}
+	cout << f_name << ", " << l_name << endl;
+	cout << "------------------------------" << endl;
+
+	for (int i = 0; i < (nt)sortedFriends.size(); i++){
+		cout << sortedFriends[i] -> f_name << ", "
+			<< sortedFriends[i] -> l_name << endl;
+	}
+}
