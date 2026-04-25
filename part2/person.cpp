@@ -1,3 +1,4 @@
+#include "misc.h"
 #include "person.h"
 
 Person::Person(){
@@ -132,11 +133,10 @@ void Person::print_person(){
 	birthdate->print_date("Month D, YYYY");
     phone->print();
     email->print();
-
 	for(int i = 0; i < (int)myfriends.size(); i++){
-		cout << myfriends[i] -> email -> get_contact("short") 
-			<< " (" << myfriends[i] -> f_name << " " 
-			<< myfriends[i] -> l_name << ")" << endl;
+		cout << codeName(myfriends[i]->f_name, myfriends[i]->l_name)
+			<< " (" << myfriends[i]->f_name << " "
+			<< myfriends[i]->l_name << ")" << endl;
 	}
 }
 
@@ -159,14 +159,19 @@ void Person::print_friends(){
 
 	for (int i = 0; i < (int)sortedFriends.size() - 1; i++){
 		for (int j = 0; j < (int)sortedFriends.size() - i - 1; j++){
-			string code1 = sortedFriends[j] -> f_name + sortedFriends[j] -> l_name;
-			string code2 = sortedFriends[j + 1] -> f_name + sortedFriends[j + 1] -> l_name;
+			string code1 = codeName(sortedFriends[j]->f_name, sortedFriends[j]->l_name);
+			string code2 = codeName(sortedFriends[j + 1]->f_name, sortedFriends[j + 1]->l_name);
 
-			if (code1[0] > code2[0] ||
-				(code1[0] == code2[0] && code1[1] > code2[1])){
+			char c10 = (code1.size() > 0) ? code1[0] : '\0';
+			char c11 = (code1.size() > 1) ? code1[1] : '\0';
+			char c20 = (code2.size() > 0) ? code2[0] : '\0';
+			char c21 = (code2.size() > 1) ? code2[1] : '\0';
+
+			if (c10 > c20 ||
+				(c10 == c20 && c11 > c21)){
 				
 				Person* temp = sortedFriends[j];
-				sortedFriends[j] = sortedFriends[j +1];
+				sortedFriends[j] = sortedFriends[j + 1];
 				sortedFriends[j + 1] = temp;
 				
 			}
@@ -176,7 +181,7 @@ void Person::print_friends(){
 	cout << "------------------------------" << endl;
 
 	for (int i = 0; i < (int)sortedFriends.size(); i++){
-		cout << sortedFriends[i] -> f_name << ", "
-			<< sortedFriends[i] -> l_name << endl;
+		cout << sortedFriends[i]->f_name << ", "
+			<< sortedFriends[i]->l_name << endl;
 	}
 }

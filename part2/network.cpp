@@ -4,6 +4,7 @@
 #include "misc.h"
 #include <fstream>
 #include <dirent.h>
+#include <sstream>
 
 Network::Network(){
     head = NULL;
@@ -76,7 +77,6 @@ static bool is_separator_line(const string& s){
 }
 
 void Network::loadDB(string filename){
-    // TODO: Complete this method - finished(riley)
     ifstream in(filename.c_str());
     if (!in)
         return;
@@ -91,46 +91,97 @@ void Network::loadDB(string filename){
     tail = NULL;
     count = 0;
 
-    string fn, ln, bd, el, pl, sep;
+    vector<Person*> loadedPeople;
+    vector< vector<string> > friendCodes;
+
+    string fn, ln, bd, phoneLine, emailLine;
     while (getline(in, fn)){
         if (fn.size() == 0)
             continue;
         if (is_separator_line(fn))
             continue;
-        if (!getline(in, ln))
-            break;
-        if (!getline(in, bd))
-            break;
-        if (!getline(in, el))
-            break;
-        if (!getline(in, pl))
-            break;
-        Person* p = new Person(fn, ln, bd, el, pl);
+
+        if (!getline(in, ln)) break;
+        if (!getline(in, bd)) break;
+        if (!getline(in, phoneLine)) break;
+        if (!getline(in, emailLine)) break;
+
+        Person* p = new Person(fn, ln, bd, emailLine, phoneLine);
         push_back(p);
-        if (getline(in, sep)){
-            if (!is_separator_line(sep)){
-                // malformed vs. strict template; keep going without losing a line
+        loadedPeople.push_back(p);
+
+        vector<string> onePersonCodes;
+        string line;
+        if (!getline(in, line))
+            break;
+
+        if (line.compare(0, 8, "FRIENDS ") == 0){
+            int fcount = 0;
+            string numStr = line.substr(8);
+            istringstream ss(numStr);
+            ss >> fcount;
+
+            for (int i = 0; i < fcount; i++){
+                string c;
+                if (getline(in, c))
+                    onePersonCodes.push_back(c);
+            }
+
+            getline(in, line); // separator line
+        }
+        else if (!is_separator_line(line)){
+            // Backward fallback: read until separator if needed
+            while (!is_separator_line(line)){
+                string c = line;
+                size_t pos = c.find(' ');
+                if (pos != string::npos)
+                    c = c.substr(0, pos);
+                onePersonCodes.push_back(c);
+
+                if (!getline(in, line))
+                    break;
+            }
+        }
+
+        friendCodes.push_back(onePersonCodes);
+    }
+
+    // resolve friend pointers from stored codes
+    for (int i = 0; i < (int)loadedPeople.size(); i++){
+        for (int j = 0; j < (int)friendCodes[i].size(); j++){
+            string wanted = friendCodes[i][j];
+            for (int k = 0; k < (int)loadedPeople.size(); k++){
+                string candidate = codeName(loadedPeople[k]->f_name, loadedPeople[k]->l_name);
+                if (candidate == wanted){
+                    loadedPeople[i]->makeFriend(loadedPeople[k]);
+                    break;
+                }
             }
         }
     }
-    
 }
 
 void Network::saveDB(string filename){
-    // TODO: Complete this method - finished(riley)
     ofstream out(filename.c_str());
 	if (!out)
 		return;
 	Person* ptr = head;
-	streambuf* oldbuf = cout.rdbuf();
 	while (ptr != NULL){
-		cout.rdbuf(out.rdbuf());
-		ptr->print_person();
-		cout.rdbuf(oldbuf);
-		out << "--------------------" << endl;
+        out << ptr->f_name << endl;
+        out << ptr->l_name << endl;
+        streambuf* oldbuf = cout.rdbuf();
+        cout.rdbuf(out.rdbuf());
+        ptr->birthdate->print_date("Month D, YYYY");
+        cout.rdbuf(oldbuf);
+        out << ptr->phone->get_contact("full") << endl;
+        out << ptr->email->get_contact("full") << endl;
+        out << "FRIENDS " << ptr->myfriends.size() << endl;
+        for (int i = 0; i < (int)ptr->myfriends.size(); i++){
+            out << codeName(ptr->myfriends[i]->f_name, ptr->myfriends[i]->l_name) << endl;
+        }
+        out << "--------------------" << endl;
 		ptr = ptr->next;
 	}
-	cout.rdbuf(oldbuf);
 }
 
 
@@ -215,6 +266,7 @@ void Network::showMenu(){
         cout << "4. Remove a person \n";
         cout << "5. Print people with last name  \n";
         cout << "6. Connect two people \n"; //add new connection option
+        cout << "7. Wise Search \n";
         cout << "\nSelect an option ... ";
         
         if (cin >> opt) {
@@ -357,6 +409,44 @@ void Network::showMenu(){
                     p2->print_person();
                 }
             }
+        }
+        else if (opt == 7){
+            cout << "Wise Search:\n\n";
+            cout << "Search By:\n";
+            string key;
+            getline(cin, key);
+        
+            bool found = false;
+            Person* cur = head;
+        
+            while (cur != NULL){
+                bool match = false;
+        
+                if (cur->f_name == key || cur->l_name == key)
+                    match = true;
+                else if ((cur->f_name + " " + cur->l_name) == key)
+                    match = true;
+                else if (cur->phone->get_contact("short") == key || cur->phone->get_contact("full") == key)
+                    match = true;
+                else if (cur->email->get_contact("short") == key || cur->email->get_contact("full") == key)
+                    match = true;
+                else{
+                    Date inputDate(key);
+                    if (*(cur->birthdate) == inputDate)
+                        match = true;
+                }
+        
+                if (match){
+                    cur->print_person();
+                    found = true;
+                    break;
+                }
+        
+                cur = cur->next;
+            }
+        
+            if (!found)
+                cout << "Person not found\n";
         }
         else
             cout << "Nothing matched!\n";
